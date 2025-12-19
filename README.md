@@ -32,69 +32,106 @@
 
 ```
 noteAI/
-├── README.md                    # このファイル
-├── note_data_collector.py       # 基本的なデータ収集スクリプト
-├── collect_power_data.py        # 完全自動化版（検索→収集→分析）
-├── test_api.py                  # API存在確認テスト
-├── test_search_api.py           # 検索API調査
-├── test_search_detail.py        # 検索API詳細調査
-└── note_power_data.csv          # 収集データ（実行後に生成）
+├── README.md                      # このファイル
+├── collect_power_data.py          # Phase 1: データ収集（検索→収集→分析）
+├── prepare_training_data.py       # Phase 2: 学習データ準備（クレンジング→JSONL）
+├── train_model_colab.ipynb        # Phase 3: Google Colab学習ノートブック
+├── inference.py                   # Phase 4: タイトル生成・評価ツール
+│
+├── note_power_data.csv            # 収集した生データ
+├── training_data.jsonl            # 評価モデル用学習データ
+├── generation_training.jsonl      # 生成モデル用学習データ
+├── data_report.txt                # データ品質レポート
+│
+├── note_data_collector.py         # (旧) 基本収集スクリプト
+├── test_api.py                    # API存在確認テスト
+├── test_search_api.py             # 検索API調査
+└── test_search_detail.py          # 検索API詳細調査
 ```
 
 ---
 
 ## 🚀 使い方
 
-### Step 1: API 動作確認
-
-```bash
-python test_api.py
-```
-
-### Step 2: データ収集（完全自動）
+### Step 1: データ収集
 
 ```bash
 python collect_power_data.py
 ```
 
-設定を変更する場合は `collect_power_data.py` を編集：
+### Step 2: 学習データ準備
 
-```python
-# 検索キーワード
-SEARCH_KEYWORDS = ["副業", "ブログ", "稼ぐ"]
+```bash
+python prepare_training_data.py
+```
 
-# フォロワー数の条件
-MIN_FOLLOWERS = 10
-MAX_FOLLOWERS = 1000
+### Step 3: AI 学習（Google Colab）
+
+1. `train_model_colab.ipynb` と `generation_training.jsonl` を Google Drive にアップロード
+2. Colab で開き、ランタイムを GPU に設定
+3. 上から順番にセルを実行
+
+### Step 4: タイトル生成・評価
+
+```bash
+# タイトル生成
+python inference.py --keyword "副業で月5万円"
+
+# タイトル評価
+python inference.py --analyze "【2025年最新】AIで稼ぐ方法"
+
+# 対話モード
+python inference.py --interactive
 ```
 
 ---
 
 ## 📈 開発ロードマップ
 
-### Phase 1: データ収集 ✅（現在地）
+### Phase 1: データ収集 ✅ 完了
 
 - [x] API エンドポイント調査
 - [x] データ収集スクリプト作成
 - [x] 「実力スコア」計算ロジック実装
+- [x] 419 件のデータ収集完了
 
-### Phase 2: データ整形（次のステップ）
+### Phase 2: データ整形 ✅ 完了
 
-- [ ] CSV データのクレンジング
-- [ ] 学習用フォーマット（JSONL）への変換
-- [ ] 「成功」「失敗」ラベル付け
+- [x] CSV データのクレンジング
+- [x] 学習用フォーマット（JSONL）への変換
+- [x] 「成功」「失敗」ラベル付け
+- [x] タイトル特徴分析レポート
 
-### Phase 3: AI 学習
+### Phase 3: AI 学習（Google Colab で実行）
 
-- [ ] Google Colab 環境構築
-- [ ] 日本語ベースモデル選定（rinna 等）
-- [ ] LoRA でファインチューニング
+- [x] Google Colab ノートブック作成
+- [x] 日本語ベースモデル選定（rinna/japanese-gpt-neox-3.6b）
+- [ ] LoRA でファインチューニング実行
 
-### Phase 4: 推論・運用
+### Phase 4: 推論・運用 ✅ 完了
 
-- [ ] タイトル生成機能の実装
-- [ ] タイトル評価（スコアリング）機能
-- [ ] ローカル GUI 作成（オプション）
+- [x] タイトル生成機能（テンプレートベース）
+- [x] タイトル評価（スコアリング）機能
+- [x] コマンドラインツール
+
+---
+
+## 📊 収集データ統計
+
+| 項目                            | 値     |
+| ------------------------------- | ------ |
+| 総記事数                        | 419 件 |
+| ユニークユーザー                | 26 人  |
+| 学習データ（クレンジング後）    | 273 件 |
+| 成功ラベル（Power Score ≥ 1.0） | 39 件  |
+| 最高 Power Score                | 22.02  |
+
+### 成功タイトルの特徴（分析結果）
+
+- **【】括弧使用**: 83.3%
+- **数字使用**: 75.0%
+- **金銭関連ワード**: 50.0%
+- **平均文字数**: 49.3 文字
 
 ---
 
