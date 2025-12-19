@@ -22,17 +22,21 @@ OUTPUT_JSONL = "training_data.jsonl"
 OUTPUT_REPORT = "data_report.txt"
 
 # Power Score閾値（これ以上を「成功タイトル」とする）
-SUCCESS_THRESHOLD = 1.0  # 1.0以上 = フォロワー数以上のスキを獲得
+SUCCESS_THRESHOLD = 0.5  # 有料記事はハードルが高いので緩和
 
-# 除外条件（緩和版：タイトルパターン学習に不要なもののみ）
+# 有料記事のみを対象にするか
+PAID_ONLY = True
+
+# 除外条件（タイトルパターン学習に不要なもののみ）
 EXCLUDE_PATTERNS = [
     r"^サイトマップ$",  # 目次系のみ
     r"^マガジン",  # 非記事系
     r"^おはよう朝ふみ",  # 定型連載（冒頭のみ）
+    r"^自己紹介$",  # 単純な自己紹介のみ
 ]
 
-# 最低スキ数（ノイズ除去）- 緩和
-MIN_LIKES = 10
+# 最低スキ数（ノイズ除去）
+MIN_LIKES = 5
 
 
 # ============================================================
@@ -98,6 +102,15 @@ def clean_data(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     original_count = len(df)
     removal_log = {"original": original_count, "steps": []}
 
+    # Step 0: 有料記事のみを抽出（PAID_ONLYが有効な場合）
+    if PAID_ONLY and "is_paid" in df.columns:
+        mask = df["is_paid"].fillna(False).astype(bool)
+        removed = len(df) - mask.sum()
+        df = df[mask].copy()
+        removal_log["steps"].append(
+            {"step": "有料記事のみ", "removed": removed, "remaining": len(df)}
+        )
+
     # Step 1: 除外パターンに該当するタイトルを除去
     pattern = "|".join(EXCLUDE_PATTERNS)
     mask = ~df["title"].str.contains(pattern, case=False, regex=True, na=False)
@@ -137,7 +150,9 @@ def clean_data(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
 
     removal_log["final"] = len(df)
     removal_log["removed_total"] = original_count - len(df)
-    removal_log["retention_rate"] = len(df) / original_count * 100
+    removal_log["retention_rate"] = (
+        len(df) / original_count * 100 if original_count > 0 else 0
+    )
 
     return df, removal_log
 
