@@ -46,8 +46,9 @@ noteAI/
 ├── README.md                          # このファイル
 │
 ├── ## 🌟 2026年版（推奨）
-├── train_unsloth_2026.ipynb           # ★ Unsloth + Qwen3-4B トレーニング
+├── train_unsloth_2026.ipynb           # ★ Unsloth + Qwen3-14B トレーニング
 ├── inference_2026.py                  # ★ 推論スクリプト
+├── collect_power_data_custom.py       # ★★★ 世界最高水準キーワード（126個・6カテゴリ）
 ├── collect_power_data_v3.py           # Phase 1: データ収集（70キーワード）
 ├── prepare_training_data_v2.py        # Phase 2: Evol-Instruct形式
 ├── augment_data.py                    # Phase 2.5: 合成データ生成
@@ -55,6 +56,7 @@ noteAI/
 ├── ## 📂 データ
 ├── data/
 │   ├── raw_notes_v3.jsonl             # 生データ
+│   ├── raw_notes_custom.jsonl         # ★ 世界最高水準収集データ
 │   ├── processed/                     # 処理済み
 │   │   ├── training_data.jsonl
 │   │   └── evol_instruct_data.jsonl
@@ -78,16 +80,27 @@ noteAI/
 
 ## 🚀 クイックスタート
 
-### Step 1: データ収集
+### Step 1: データ収集（世界最高水準版）
 
 ```bash
-python collect_power_data_v3.py
+python collect_power_data_custom.py   # ★★★ 推奨（126キーワード・6カテゴリ）
 ```
+
+**世界最高水準キーワード（2024-2025リサーチ結果）**:
+
+| カテゴリ | 比率 | 根拠 |
+|----------|------|------|
+| 💰 投資・マネー | 20% | note最人気（平均ビュー150-300） |
+| 🧠 自己啓発・哲学 | 25% | あなたの強み + note人気 |
+| 💻 AI・テック | 25% | あなたのメイン + 急成長分野 |
+| 🔧 ライフハック | 10% | 「○つの方法」パターン収集 |
+| 🎬 エンタメ | 10% | 多様性確保 |
+| 💼 副業・キャリア | 10% | 収益化で人気 |
 
 **収集条件**:
 
-- 70+キーワード（8カテゴリ）
-- フォロワー10〜1000人（インフルエンサー除外）
+- 126キーワード（6カテゴリ）
+- フォロワー5〜3000人（インフルエンサー除外）
 - Power Score（スキ/フォロワー）計算
 
 ### Step 2: データ準備
