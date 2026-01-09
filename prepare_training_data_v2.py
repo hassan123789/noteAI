@@ -21,7 +21,7 @@ from typing import Dict, List, Optional, Tuple
 # ============================================================
 
 DATA_DIR = Path("data")
-RAW_DATA_FILE = DATA_DIR / "raw_notes_v3.jsonl"
+RAW_DATA_FILE = DATA_DIR / "raw_notes_custom.jsonl"  # 収集済みデータ
 OUTPUT_DIR = DATA_DIR / "processed"
 
 # 出力ファイル
